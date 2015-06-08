@@ -1,0 +1,41 @@
+html(lang="en")
+	head
+		meta(charset="utf-8")
+		meta(http-equiv="X-UA-Compatible", content="IE=edge")
+		meta(name="viewport", content="width=device-width, initial-scale=1")
+		title NuloBlanco
+		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
+		script(src="js/Chart.js")
+		link(href="css/bootstrap.min.css", rel="stylesheet")
+		link(href="css/main.css", rel="stylesheet")
+
+	body
+		//- Main div
+		div(class=["container", "main-container"])
+			.col-md-12
+				.col-md-4
+					img(src="img/logo.png")
+				.col-md-8
+					h1 NuloBlanco - Welcome
+					p.lead Please log on the application.
+			.col-md-12
+				form(class="form-horizontal",method="POST",action="login")
+					fieldset
+						legend Enter the node.js login data.
+						
+						//- User form
+						.form-group
+							label(class=["col-md-4", "control-label"], for="username") Username
+							.col-md-4
+								input#username(name="username",type="text", placeholder="sebastian.carrille", class=["form-control input-md"], required="true")
+
+						//- Password form
+						.form-group
+							label(class=["col-md-4", "control-label"], for="password") Password
+							.col-md-4
+								input#password(name="password",type="password", class=["form-control", "input-md"], required="true")
+						//- Send button
+						.form-group
+							.col-md-12
+								input#send(name="send",type="submit", class=["btn", "btn-default"])
+

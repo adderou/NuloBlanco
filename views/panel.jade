@@ -1,0 +1,135 @@
+//- header.jade
+doctype html
+html(lang="en")
+	head
+		meta(charset="utf-8")
+		meta(http-equiv="X-UA-Compatible", content="IE=edge")
+		meta(name="viewport", content="width=device-width, initial-scale=1")
+		title NuloBlanco
+		script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
+		script(src="js/Chart.js")
+		link(href="css/bootstrap.min.css", rel="stylesheet")
+		link(href="css/main.css", rel="stylesheet")
+		script(type="text/javascript",src="js/colpick.js")
+		link(href="css/colpick.css", rel="stylesheet")
+	body
+
+		script(src="http://"+host+":"+socketPort+"/socket.io/socket.io.js")
+		script(type="text/javascript")= "var socket = io.connect('http://"+host+":"+socketPort+"');var password='"+password+"';"
+		script(src="/js/nullblank-panel.js")
+
+		div(class=["container","main-container"])
+			.starter-template
+				.col-md-12
+					.col-md-4
+						img(src="img/logo.png")
+					.col-md-8
+						h1 NuloBlanco - Control Panel
+						p.lead Here you can edit in real time the info displayed.
+
+				.col-md-6
+					div(class="panel panel-success")
+						.panel-heading
+							div Ballot Embed Preview
+						.panel-body
+							iframe(src="/embed",width="100%",height="500px",frameBorder="0")
+				.col-md-6
+					div(class="panel panel-success")
+						.panel-heading
+							div Ballot Context
+						.panel-body
+							table#information.table
+								thead
+									tr
+										th Option
+										th Value
+								tbody 
+									tr
+										td Ballot Title
+										td
+											.col-xs-8
+												input#title-value(class=["form-control","input-sm"],type="text")
+											.col-xs-4
+												button#title-value-set(class=["btn", "btn-success","ballot-context"]) Set
+									tr
+										td Description
+										td 
+											.col-xs-8
+												textarea#description-value.form-control
+											.col-xs-4
+												button#description-value-set(class=["btn","btn-success", "ballot-context"]) Set
+
+
+					div(class="panel panel-success")
+						.panel-heading
+							div Embed Code
+						.panel-body
+							textarea.form-control= '<iframe src="http://'+host+':'+port+'/embed" width="100%" height="500px" frameBorder="0"> </iframe>'
+
+				.col-md-12
+
+					div(class="panel panel-success")
+						.panel-body 
+							.col-md-6
+								.col-xs-10
+									select#ballot-boxes.form-control
+								.col-xs-2
+									button#ballot-boxes-remove(class=["btn btn-danger"]) X
+							.col-md-6
+								.col-xs-8
+									input#add-bb-value(class=["form-control","input-sm"],type="text")
+								.col-xs-4
+									button#add-bb-value-set(class=["btn","btn-success"]) Add BB
+
+						div(class="panel panel-success")
+							.panel-heading
+								div.inline Ballot Box:
+							.panel-body
+								table.table
+									thead
+										tr
+											th Option
+											th Value
+									tbody
+										tr
+											td BB Name
+											td
+												.col-xs-8
+													input#bb-name-value(class=["form-control","input-sm"],type="text")
+												.col-xs-4
+													button#bb-name-value-set(class=["btn","btn-success","ballot-boxes"]) Set
+
+										tr
+											td BB votes
+											td
+												.col-xs-8
+													input#bb-votes-value(class=["form-control","input-sm"],type="text")
+												.col-xs-4
+													button#bb-votes-value-set(class=["btn","btn-success","ballot-boxes"]) Set
+										tr
+											td BB Quorum
+											td
+												.col-xs-8
+													input#bb-quorum-value(class=["form-control","input-sm"],type="text")
+												.col-xs-4
+													button#bb-quorum-value-set(class=["btn","btn-success","ballot-boxes"]) Set
+
+						div(class="panel panel-success")
+							.panel-heading
+								div#options-title Ballot Options
+								button#options-add(class=["btn btn-success"]) +
+							.panel-body
+								table.table
+									thead
+										tr
+											th Delete
+											th Option
+											th Color
+											th Votes
+									tbody#options
+										//- More votes here
+		script(src="js/bootstrap.min.js")
+
+
+
+

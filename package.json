@@ -1,0 +1,25 @@
+{
+  "name": "nuloblanco",
+  "version": "1.0.0",
+  "description": "Keep track of ballot results with this real-time express-and-socket.io-based node.js app :)",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adderou/nuloblanco/"
+  },
+  "keywords": [
+    "ballot",
+    "voting",
+    "nuloblanco"
+  ],
+  "author": "Eduardo Riveros",
+  "license": "ISC",
+ "dependencies" :
+  { "express":"latest",
+    "express-session":"latest",
+    "body-parser":"latest",
+    "socket-io":"latest"
+}
