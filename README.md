@@ -6,5 +6,6 @@ The app uses the following node.js libraries:
 * Express-session
 * Socket.io
 * body-parser
+* Jade
 
 Also, the app uses Bootstrap's CSS for panel design and Charts.js library for the Pie Chart.
