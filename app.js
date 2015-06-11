@@ -12,7 +12,7 @@
 */
 var expressPort = 1234;
 var socketPort = 1313;
-var siteUrl = "ardilla.cuy.cl";
+var siteUrl = "localhost";
 
 
 var io = require("socket.io")(socketPort);
@@ -173,9 +173,20 @@ var server = app.listen(expressPort, function () {
 */
 
 console.log("Socket.io server listening at port %s", socketPort);
-io.on('connection', function (socket) {
+io.on('connection', function(socket) {
 
-	socket.on('update', function (dataBit) {
+	socket.on('loaddata',function(newData) {
+		if (newData.password==password) {
+			console.log("We will load new data!");
+			votingData = newData.data;
+		   	io.emit("data",votingData);
+		   	console.log("Data loaded!");
+		} else {
+			console.log("Unauthorized load of data");
+		}
+	});
+
+	socket.on('update', function(dataBit) {
     	if (dataBit.password == password) {
     		console.log("data received!");
     		var current = votingData;

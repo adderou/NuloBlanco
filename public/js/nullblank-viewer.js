@@ -98,13 +98,13 @@ function updateData() {
 }	
 
 function setBallotBoxesVal(bbVal) {
+	var totalVotes = 0;
+	var totalQuorum = 0;
+	for (var i=0;i<data.ballotBoxes.length;i++) {
+		totalVotes+=parseInt(data.ballotBoxes[i].votes);
+		totalQuorum+=parseInt(data.ballotBoxes[i].quorum);
+	}
 	if (bbVal==-1) {
-		var totalVotes = 0;
-		var totalQuorum = 0;
-		for (var i=0;i<data.ballotBoxes.length;i++) {
-			totalVotes+=parseInt(data.ballotBoxes[i].votes);
-			totalQuorum+=parseInt(data.ballotBoxes[i].quorum);
-		}
 		$("#bb-name-value").text("Total");
 		$("#bb-votes-value").text(totalVotes);
 		$("#bb-quorum-value").text(totalQuorum);
@@ -112,7 +112,7 @@ function setBallotBoxesVal(bbVal) {
 		var bbData = data.ballotBoxes;
 		$("#bb-name-value").text(bbData[bbVal].name);
 		$("#bb-votes-value").text(bbData[bbVal].votes);
-		$("#bb-quorum-value").text(bbData[bbVal].quorum);
+		$("#bb-quorum-value").text(totalQuorum);
 	}
 }
 

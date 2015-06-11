@@ -42,6 +42,7 @@ socket.on('dataBit', function (dataBit) {
 
 function updateData() {
 	//Set title and description
+	$("#load-save").val(JSON.stringify(data));
 	$("#title-value").val(data.title);
 	$("#description-value").val(data.description);
 	var bbData = data.ballotBoxes;
@@ -108,6 +109,21 @@ function bindStaticButtons() {
 	//Binding Add Option Buttons
 
 	$("#options-add").click(optionAdd);
+
+	$("#load-data").click(loadData);
+}
+
+function loadData() {
+	console.log("trying to load data...")
+	try {
+		var newData = JSON.parse($("#load-save").val());
+		console.log("data loaded! updating...")
+	} catch(e) {
+		return false;	
+	}
+	var sending = {"password":password,"data":newData};
+	socket.emit('loaddata',sending);
+	return true;
 }
 
 function bindOptionButtons() {
