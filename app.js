@@ -26,13 +26,18 @@ app.set('view engine', 'jade');
 
 var bodyParser = require('body-parser');
 
+var bcrypt = require("bcryptjs");
+var salt = bcrypt.genSaltSync(10);
+
 // Create application/x-www-form-urlencoded parser
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 })); 
 
+/*
 // Credentials
-// They are used in login page. */
+//They are used in login page.
+*/
 var username = "admin";
 var password = "pass";
 
@@ -41,10 +46,16 @@ var password = "pass";
 */
 
 app.use(session({
-  secret: 'supersecret',
+  secret: 'imapineapple',
   resave: false,
   saveUninitialized: true
 }));
+
+
+/*
+// Password hashing
+*/
+var password = bcrypt.hashSync(password, salt);
 
 /*
 // Data Structure with Results and Voting Information
@@ -119,7 +130,7 @@ app.get('/', function (req, res) {
 app.post('/login', function (req, res) {
 	var loggeduser = req.body.username;
 	var loggedpwd = req.body.password;
-	if (loggeduser==username && loggedpwd==password) {
+	if (loggeduser==username && bcrypt.compareSync(loggedpwd,password)) {
 		req.session.password = password;
 		loggedin = req.session.loggedin = true
 		res.redirect('/panel');
@@ -163,7 +174,7 @@ var server = app.listen(expressPort, function () {
 
   port = server.address().port;
 
-  console.log('Nullblank Express server listening at port %s', port);
+  console.log('Nullblank Express server listening at %s:%s', siteUrl,port);
 
 });
 
@@ -176,7 +187,7 @@ console.log("Socket.io server listening at port %s", socketPort);
 io.on('connection', function(socket) {
 
 	socket.on('loaddata',function(newData) {
-		if (newData.password==password) {
+		if (newData.password == password) {
 			console.log("We will load new data!");
 			votingData = newData.data;
 		   	io.emit("data",votingData);
@@ -219,6 +230,7 @@ io.on('connection', function(socket) {
 					}
 	    		}
 	    	}
+	    	delete dataBit.password;
 	    	io.emit("dataBit",dataBit);
     	} else {
     		//You shall not pass!

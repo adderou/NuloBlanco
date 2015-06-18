@@ -14,35 +14,41 @@ html(lang="en")
 
 
 	body
-		.col-xs-12
-			.col-xs-3
-				img(src="img/logo_mini.png")
-			.col-xs-9
-				h1#title-value
-		canvas#myChart
-		#description-value
-		.col-md-12
-			select#ballot-boxes.form-control
-			table.table
-				thead
-					tr
-						th Ballot Box
-						th Votes
-						th Quorum
+		.container
+			.col-md-12
+				.col-xs-3
+					img(src="img/logo_mini.png")
+				.col-xs-9
+					h1#title-value
+			.col-md-6
+				canvas#myChart
+				p
+				div(class=["panel","panel-info"])
+					.panel-heading Info
+					.panel-body
+						#description-value
+			.col-md-6
+				select#ballot-boxes.form-control
+				table.table
+					thead
+						tr
+							th Ballot Box
+							th Votes
+							th Quorum
 
-				tbody
-					tr
-						td#bb-name-value Loading...
-						td#bb-votes-value 0
-						td#bb-quorum-value 0%
+					tbody
+						tr
+							td#bb-name-value Loading...
+							td#bb-votes-value 0
+							td#bb-quorum-value 0%
 
-			table.table
-				thead
-					tr
-						th Option
-						th Color
-						th Votes
-						th %
-				tbody#options
-					//- More votes here
-				
+				table.table
+					thead
+						tr
+							th Option
+							th Color
+							th Votes
+							th %
+					tbody#options
+						//- More votes here
+					

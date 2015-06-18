@@ -1,4 +1,5 @@
 var data;
+var addedBB=false;
 
 socket.on('data', function (newData) {
     console.log("Updating new data...");
@@ -35,6 +36,15 @@ socket.on('dataBit', function (dataBit) {
 				data.ballotBoxes[i].options.splice(num,1);
 			}
 		}
+		//If Ballot Box is deleted, we need to mantain the index of the selector.
+		if (dataBit.field[0]=="ballotBoxes") {
+			bbID = dataBit.field[1];
+			var bbSelect = $("#ballot-boxes");
+			var bbVal = bbSelect.val();
+			if (bbVal>0 && bbID<=bbVal) {
+				bbSelect.val(bbVal-1);
+			}
+		}
 	}
 	//Update all... (I want to sleep)
 	updateData();
@@ -60,7 +70,11 @@ function updateData() {
 			})
 		);
 	}
-	bbVal = Math.min(bbVal,(bbData.length-1));
+	//if ballot box added, we select the last ballot box on selector
+	if (addedBB==true) {
+		bbVal = bbData.length-1;
+		addedBB=false;
+	}
 	bbSelect.val(bbVal);
 	// Show actual ballot box data
 	setBallotBoxesVal(bbVal);
@@ -181,24 +195,27 @@ function ballotBoxesAction(event) {
 }
 
 function addBallotBoxesAction(event) {
-	fieldValue = event.data.field.val();
+	var fieldValue = event.data.field.val();
 	var bbSize = data.ballotBoxes.length;
+	//Creating ballot box
 	var dataBit = {
 		"password":	password,
 		"field": ["ballotBoxes",bbSize],
 		"value": {
 			"name":fieldValue,
 			"votes":0,
-			"quorum":1,
+			"quorum":0,
 			"options":[]
 		}
 	};
+	//Creating options for ballot box
 	for (var i=0;i<data.options.length;i++) {
 		dataBit.value.options[i]=0;
 	}
 	sendData(dataBit);
 	event.data.field.val("");
-	$("#ballot-boxes").val(bbSize);
+	console.log("bb updated!");
+	addedBB = true;
 }
 
 function removeBallotBoxesAction(event) {

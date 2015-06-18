@@ -10,6 +10,7 @@ socket.on('data', function (newData) {
 });
 
 socket.on('dataBit', function (dataBit) {
+	console.log(dataBit);
 	var current = data;
 	//Go to space that needs to be updated.
 	var i
@@ -31,11 +32,20 @@ socket.on('dataBit', function (dataBit) {
 		var num = dataBit.field[i];
 		current.splice(num,1);
 		//Delete data!
-		console.log("data deleted!");
-		//If options deleted, we need to delete ballotboxes options
+		console.log("data Deleted!");
+		//If an option is deleted, we need to delete ballotboxes options
 		if (dataBit.field[0]=="options" && dataBit.field.length==2) {
 			for(var i=0;i<data.ballotBoxes.length;i++) {
 				data.ballotBoxes[i].options.splice(num,1);
+			}
+		}
+		//If Ballot Box is deleted, we need to mantain the index of the selector.
+		if (dataBit.field[0]=="ballotBoxes") {
+			bbID = dataBit.field[1];
+			var bbSelect = $("#ballot-boxes");
+			var bbVal = bbSelect.val() === null ? -1 : bbSelect.val();
+			if (bbVal>=0 && bbID<=bbVal) {
+				bbSelect.val(bbVal-1);
 			}
 		}
 	}
@@ -105,15 +115,19 @@ function setBallotBoxesVal(bbVal) {
 		totalQuorum+=parseInt(data.ballotBoxes[i].quorum);
 	}
 	if (bbVal==-1) {
+		var quorum = totalQuorum;
+		var votes = totalVotes;
 		$("#bb-name-value").text("Total");
 		$("#bb-votes-value").text(totalVotes);
-		$("#bb-quorum-value").text(totalQuorum);
 	} else {
-		var bbData = data.ballotBoxes;
-		$("#bb-name-value").text(bbData[bbVal].name);
-		$("#bb-votes-value").text(bbData[bbVal].votes);
-		$("#bb-quorum-value").text(totalQuorum);
+		var bbData = data.ballotBoxes[bbVal];
+		var quorum = bbData.quorum;
+		var votes = bbData.votes;
+		$("#bb-name-value").text(bbData.name);
+		$("#bb-votes-value").text(bbData.votes);
 	}
+	var quorumPercentage = (votes*100.0/quorum);
+	$("#bb-quorum-value").text(""+quorumPercentage.toFixed(2)+"% ("+quorum+")");
 }
 
 function setOptionsVal(bbVal) {
@@ -229,7 +243,8 @@ function updateChart() {
 	chartData = generateChartData();
 	ctx = $("#myChart").get(0).getContext("2d");
 	myPieChart = new Chart(ctx).Pie(chartData, {
-		    animation:false
+		    animation:false,
+		    segmentShowStroke:false
 	});
 }
 
