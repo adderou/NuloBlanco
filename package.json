@@ -22,6 +22,7 @@
     "express-session":"latest",
     "body-parser":"latest",
     "socket.io":"latest",
-    "jade":"latest"
+    "jade":"latest",
+    "bcryptjs":latest
   }
 }
