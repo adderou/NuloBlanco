@@ -23,6 +23,6 @@
     "body-parser":"latest",
     "socket.io":"latest",
     "jade":"latest",
-    "bcryptjs":latest
+    "bcryptjs":"latest"
   }
 }

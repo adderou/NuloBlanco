@@ -67,15 +67,15 @@ var votingData = {
 			    "options": [
 			        {
 			        	"name":"Option 0",
-			        	"color":"#FF0000"
+			        	"color":"#FF0000",
 			        },
 			        {
 			        	"name":"Option 1",
-			        	"color":"#00FF00"
+			        	"color":"#00FF00",
 			        },
 			        {
 			        	"name":"Option 2",
-			        	"color":"#0000FF"
+			        	"color":"#0000FF",
 			        }
 			        
 			    ],
@@ -112,21 +112,25 @@ var loggedin=0;
 
 /*
 // Index section
-// Used for logging in to the application.
+// Used for viewing the data of the application.
 */
 app.get('/', function (req, res) {
-	var loggedin = req.session.loggedin;
-	if (!loggedin) {
-		res.render('index');
-	} else {
-		res.redirect('/panel');
-	}
+	res.redirect('/embed');		
 });
 
 /*
 // Login section
 // Used for authenticate the users.
 */
+app.get('/login', function (req, res) {
+	var loggedin = req.session.loggedin;
+	if (!loggedin) {
+		res.render('login');
+	} else {
+		res.redirect('/panel');
+	}
+})	;
+
 app.post('/login', function (req, res) {
 	var loggeduser = req.body.username;
 	var loggedpwd = req.body.password;
@@ -135,7 +139,7 @@ app.post('/login', function (req, res) {
 		loggedin = req.session.loggedin = true
 		res.redirect('/panel');
 	} else {
-		res.redirect('/');
+		res.redirect('/login');
 	}
 });
 
@@ -146,7 +150,7 @@ app.post('/login', function (req, res) {
 app.get('/panel', function (req, res) {
 	  var loggedin = req.session.loggedin;
 	  if (!loggedin) {
-	  	res.redirect('/');
+	  	res.redirect('/login');
 	  } else {
 	  	res.render('panel',{
 	  			"host":siteUrl,
@@ -190,6 +194,7 @@ io.on('connection', function(socket) {
 		if (newData.password == password) {
 			console.log("We will load new data!");
 			votingData = newData.data;
+			delete newData.password;
 		   	io.emit("data",votingData);
 		   	console.log("Data loaded!");
 		} else {

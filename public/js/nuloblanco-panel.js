@@ -1,67 +1,111 @@
 var data;
 var addedBB=false;
 
+// Socket receives actual data on connect.
 socket.on('data', function (newData) {
-    console.log("Updating new data...");
-    data=newData;
-    updateData();
+
+    // Load actual data.
+    console.log("Updating new data.");
+    data = newData;
+
+    // Render the data on the view.
+    renderData();
 });
 
+// Socket receives "DataBit" on update.
 socket.on('dataBit', function (dataBit) {
+
+	// Initialize some variables.
 	var current = data;
-	//Go to space that needs to be updated.
-	var i
-	for (i=0;i<dataBit.field.length-1;i++) {
-		current = current[dataBit.field[i]];
+	var i;
+	var fields = dataBit.field;
+	var last = dataBit.field.length - 1;
+
+	// Go to space that needs to be updated.
+	for (i = 0; i < fields.length - 1; i++) {
+		current = current[fields[i]];
 	}
-    if (dataBit.value!="DELETE") {
-    	console.log("Updating a bit of data...");
-		current[dataBit.field[i]]=dataBit.value;
-		//if options added, we need to update ballotboxes
-		if (dataBit.field[0]=="options" && dataBit.field.length==2) {
-			for(var i=0;i<data.ballotBoxes.length;i++) {
+	// Update that space.
+    if (dataBit.value != "DELETE") {
+    	console.log("Some data was updated.");
+
+    	// Update value.
+		current[fields[last]]=dataBit.value;
+
+		// If options were added, we need to update ballotboxes.
+		if (fields[0] == "options" && fields.length == 2) {
+			var bb = data.ballotBoxes;
+			for(var i = 0; i < bb.length; i ++) {
 				var options = data.ballotBoxes[i].options;
 				options[options.length] = 0;
 			}
 		}
 	} else {
-		//if delete, last argument is a number...
-		var num = dataBit.field[i];
+
+		// If the update order is about delete something,
+		// the last argument must be a number.
+		var num = fields[last];
+
+		// Delete the element from the data array.
 		current.splice(num,1);
-		//Delete data!
-		console.log("data deleted!");
-		//If options deleted, we need to delete ballotboxes options
-		if (dataBit.field[0]=="options" && dataBit.field.length==2) {
+		console.log("Some data was deleted.");
+
+		// If options deleted, we need to delete ballotboxes options.
+		if (fields[0] == "options" && fields.length==2) {
+
+			// For each ballot box:
 			for(var i=0;i<data.ballotBoxes.length;i++) {
+
+				// Delete the option from it. 
 				data.ballotBoxes[i].options.splice(num,1);
 			}
 		}
-		//If Ballot Box is deleted, we need to mantain the index of the selector.
-		if (dataBit.field[0]=="ballotBoxes") {
-			bbID = dataBit.field[1];
+
+		// If Ballot Box is deleted, we need to mantain the index
+		// of the selector.
+		if (fields[0]=="ballotBoxes") {
+
+			// Select the id of the ballot box.
+			bbID = fields[1];
+
+			// Select the actual index of Selector.
 			var bbSelect = $("#ballot-boxes");
 			var bbVal = bbSelect.val();
+
+			// If modified index is less-or-equal than actual:
 			if (bbVal>0 && bbID<=bbVal) {
+
+				//Modify actual index.
 				bbSelect.val(bbVal-1);
 			}
 		}
 	}
-	//Update all... (I want to sleep)
-	updateData();
+
+	// Render all.
+	renderData();
 });
 
-function updateData() {
-	//Set title and description
-	$("#load-save").val(JSON.stringify(data));
-	$("#title-value").val(data.title);
-	$("#description-value").val(data.description);
+// Regenerates the view and shows the data again
+function renderData() {
+
+	//Initialize variables
 	var bbData = data.ballotBoxes;
 	var bbSelect = $("#ballot-boxes");
 	var bbVal = bbSelect.val() === null ? 0 : bbSelect.val();
-	//Show ballot boxes
-	//TODO: Empty ballot boxes
+	var options = data.options;
+
+	// Set title, description and JSON data.
+	$("#title-value").val(data.title);
+	$("#description-value").val(data.description);
+	$("#load-save").val(JSON.stringify(data));
+
+	// Empty ballot boxes.
 	bbSelect.empty();
-	for (var i=0;i<bbData.length;i++) {
+	
+	// For each ballot box:
+	for (var i = 0; i < bbData.length; i++) {
+
+		// Create option for the Selector.
 		bbSelect
 			.append($("<option>", {
 				"id":"bb-option-"+i,
@@ -70,86 +114,86 @@ function updateData() {
 			})
 		);
 	}
-	//if ballot box added, we select the last ballot box on selector
+
+	// If the current user added the ballot box: 
 	if (addedBB==true) {
+
+		// Change the Selector index.
 		bbVal = bbData.length-1;
 		addedBB=false;
+		bbSelect.val(bbVal);
 	}
-	bbSelect.val(bbVal);
+
 	// Show actual ballot box data
 	setBallotBoxesVal(bbVal);
-	//Show actual options data
-	var optionsData = data.options;
+
+	// Empty actual options data
 	$("#options").empty();
-	for (var i=0;i<optionsData.length;i++) {
 
-		name = optionsData[i].name;
-		color = optionsData[i].color;
-		votes = bbData[bbVal].options[i];
+	// For each option:
+	for (var i=0;i<options.length;i++) {
 
-		genBBOption(name,color,votes,i);
+		// Show it on the page.
+		var name = options[i].name;
+		var key = options[i].key;
+		var color = options[i].color;
+		var votes = bbData[bbVal].options[i];
+		genOptions(name,key,color,votes,i);
+
 	}
+
+	// Generate the binding between option buttons
+	// And actions.
 	bindOptionButtons();
 }
 
+// Sends new data to the server.
 function sendData(dataBit) {
 	socket.emit('update',dataBit);
 }
 
+// Binds the buttons of the panel to actions.
 function bindStaticButtons() {
-	//Binding context buttons
+
+	//Binding Ballot Context buttons
 	$(".ballot-context").each( function() {
 		var idSplit = $(this).attr("id").split("-");
 		var textField = $("#"+idSplit[0]+"-"+idSplit[1]);
 		$(this).click({"field":textField, "button":$(this)},ballotContextAction);
 	})
 
-	//Binding ballot boxes options buttons
+	//Binding ballot boxes context buttons
 	$(".ballot-boxes").each( function() {
 		var idSplit = $(this).attr("id").split("-");
 		var textField = $("#"+idSplit[0]+"-"+idSplit[1]+"-"+idSplit[2]);
 		$(this).click({"field":textField, "button":$(this)},ballotBoxesAction);
 	})
 
-	//Binding add-delete ballot box button
-
+	//Binding add-delete ballot box buttons.
 	$("#add-bb-value-set").click({"field":$("#add-bb-value"), "button":$(this)},addBallotBoxesAction);
 	$("#ballot-boxes-remove").click({"field":$("#ballot-boxes"), "button":$(this)},removeBallotBoxesAction);
 
-	//Binding change Ballot Box Select.
-
+	//Binding change Ballot Box select.
 	$("#ballot-boxes").change(selectBallotBoxesAction);
 
-	//Binding Add Option Buttons
-
+	//Binding Add Option button.
 	$("#options-add").click(optionAdd);
 
+	//Binding Load JSON data button.
 	$("#load-data").click(loadData);
 }
 
-function loadData() {
-	console.log("trying to load data...")
-	try {
-		var newData = JSON.parse($("#load-save").val());
-		console.log("data loaded! updating...")
-	} catch(e) {
-		return false;	
-	}
-	var sending = {"password":password,"data":newData};
-	socket.emit('loaddata',sending);
-	return true;
-}
 
 function bindOptionButtons() {
 
-	//Remove Option
+	// Button for removing the option.
 	$(".option-delete").each( function() {
 		var idSplit = $(this).attr("id").split("-");
 		var option = idSplit[1];
 		$(this).click({"option":option},optionDelete);
 	});
 
-	//Set Values
+	// Button for set an option value (Name, color, votes, key-to-bind)
 	$(".ballot-options").each( function() {
 		var idSplit = $(this).attr("id").split("-").slice(0,-1);
 		var text="#"+idSplit.join("-");
@@ -157,7 +201,7 @@ function bindOptionButtons() {
 		$(this).click({"field":textField},optionSet);
 	});
 
-	//+1-1
+	// Button for increment-decrement votes.
 	$(".add-remove-votes").each( function() {
 		var idSplit = $(this).attr("id").split("-");
 		var text = "#"+idSplit[0]+"-"+idSplit[1]+"-value";
@@ -168,6 +212,24 @@ function bindOptionButtons() {
 	})
 }
 
+// Loads data via JSON.
+function loadData() {
+	console.log("Trying to load data.")
+	// Try to parse the JSON data.
+	try {
+		var newData = JSON.parse($("#load-save").val());
+		console.log("Data loaded! Updating.")
+	} catch(e) {
+		return false;	
+	}
+
+	//Create the whole data object and send it to server.
+	var sending = {"password":password,"data":newData};
+	socket.emit('loaddata',sending);
+	return true;
+}
+
+// Modifies values of ballot.
 function ballotContextAction(event) {
 	var fieldName = event.data.field.attr("id").split("-")[0];
 	var fieldValue = event.data.field.val();
@@ -179,6 +241,7 @@ function ballotContextAction(event) {
 	sendData(dataBit);
 }
 
+// Modifies values of ballot boxes.
 function ballotBoxesAction(event) {
 	var fieldName = event.data.field.attr("id").split("-")[1];
 	var fieldValue = event.data.field.val();
@@ -194,10 +257,14 @@ function ballotBoxesAction(event) {
 	sendData(dataBit);
 }
 
+// Adds a ballot box.
 function addBallotBoxesAction(event) {
+
+	// Initializes values
 	var fieldValue = event.data.field.val();
 	var bbSize = data.ballotBoxes.length;
-	//Creating ballot box
+
+	// Creates the ballot box
 	var dataBit = {
 		"password":	password,
 		"field": ["ballotBoxes",bbSize],
@@ -208,16 +275,19 @@ function addBallotBoxesAction(event) {
 			"options":[]
 		}
 	};
-	//Creating options for ballot box
+
+	// Creates options for the ballot box.
 	for (var i=0;i<data.options.length;i++) {
 		dataBit.value.options[i]=0;
 	}
 	sendData(dataBit);
+
+	// Clears old text ond field.
 	event.data.field.val("");
-	console.log("bb updated!");
 	addedBB = true;
 }
 
+// Deletes a Ballot Box.
 function removeBallotBoxesAction(event) {
 	var bbVal = event.data.field.val();
 	var dataBit = {
@@ -228,12 +298,14 @@ function removeBallotBoxesAction(event) {
 	sendData(dataBit);
 }
 
+// Selects a ballot box.
 function selectBallotBoxesAction(event) {
-	var val = $("#ballot-boxes").val();
-	setBallotBoxesVal(val);
-	setOptionsVal(val);
+	var bbVal = $("#ballot-boxes").val();
+	setBallotBoxesVal(bbVal);
+	setOptionsVal(bbVal);
 }
 
+// Adds an option.
 function optionAdd(event) {
 	var size = data.options.length;
 		var dataBit = {
@@ -247,6 +319,7 @@ function optionAdd(event) {
 	sendData(dataBit);
 }
 
+// Deletes an option.
 function optionDelete(event) {
 	var dataBit = {
 		"password":password,
@@ -256,6 +329,7 @@ function optionDelete(event) {
 	sendData(dataBit);
 }
 
+// Sets values on an option.
 function optionSet(event) {
 	var fieldValue = event.data.field.val();
 	var SplitId =event.data.field.attr("id").split("-"); 
@@ -278,6 +352,7 @@ function optionSet(event) {
 	sendData(dataBit);
 }
 
+// Increments/Decrements votes on an option.
 function optionInDecrement(event) {
 	var val = $("#ballot-boxes").val();
 	var indec = event.data.indecremental;
@@ -292,7 +367,8 @@ function optionInDecrement(event) {
 	sendData(dataBit);
 }
 
-function genBBOption(name,color,votes,i) {
+// Shows all the Options in a BB.
+function genOptions(name,key,color,votes,i) {
 	var options = $("#options");
 	var idPrefix = "option-"+i;
 			options
@@ -390,6 +466,7 @@ function genBBOption(name,color,votes,i) {
 				);
 }
 
+// Changes the values of a ballot box using index of Select.
 function setBallotBoxesVal(bbVal) {
 	var bbData = data.ballotBoxes;
 	$("#bb-name-value").val(bbData[bbVal].name);
@@ -397,6 +474,7 @@ function setBallotBoxesVal(bbVal) {
 	$("#bb-quorum-value").val(bbData[bbVal].quorum);
 }
 
+// Updates the values of botes if Current Ballot Box changes.
 function setOptionsVal(val) {
 	var prefix = "option-";
 	for (var i=0;i<data.options.length;i++) {
@@ -404,6 +482,7 @@ function setOptionsVal(val) {
 	}
 }
 
+// Generates a random color.
 function randColor() {
 	var letters = '0123456789ABCDEF'.split('');
     var color = '#';
@@ -413,6 +492,7 @@ function randColor() {
     return color;
 }
 
+// Binds static buttons.
 $(document).ready(function() {
 	bindStaticButtons();
 });
