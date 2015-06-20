@@ -93,11 +93,11 @@ function updateData() {
 		var totalvotes=0;
 		if (bbVal!=-1) {
 			votes = bbData[bbVal].options[i];
-			totalvotes = bbData[bbVal].votes;
+			totalvotes = getBBVotes(bbVal);
 		} else {
 			for (var j=0;j<data.ballotBoxes.length;j++) {
 				votes+=data.ballotBoxes[j].options[i];
-				totalvotes+=data.ballotBoxes[j].votes;
+				totalvotes+=getBBVotes(j);
 			}
 		}
 		percentage = (votes*100.0)/totalvotes;
@@ -110,24 +110,38 @@ function updateData() {
 function setBallotBoxesVal(bbVal) {
 	var totalVotes = 0;
 	var totalQuorum = 0;
-	for (var i=0;i<data.ballotBoxes.length;i++) {
-		totalVotes+=parseInt(data.ballotBoxes[i].votes);
+	for (var i = 0; i < data.ballotBoxes.length; i++) {
+		totalVotes+=parseInt(getBBVotes(i));
 		totalQuorum+=parseInt(data.ballotBoxes[i].quorum);
 	}
 	if (bbVal==-1) {
 		var quorum = totalQuorum;
 		var votes = totalVotes;
 		$("#bb-name-value").text("Total");
-		$("#bb-votes-value").text(totalVotes);
+		$("#bb-votes-value").text(votes);
 	} else {
 		var bbData = data.ballotBoxes[bbVal];
 		var quorum = bbData.quorum;
-		var votes = bbData.votes;
+		var votes = getBBVotes(bbVal);
+		console.log("antes:"+votes);
 		$("#bb-name-value").text(bbData.name);
-		$("#bb-votes-value").text(bbData.votes);
+		$("#bb-votes-value").text(votes);
 	}
 	var quorumPercentage = (votes*100.0/quorum);
 	$("#bb-quorum-value").text(""+quorumPercentage.toFixed(2)+"% ("+quorum+")");
+}
+
+function getBBVotes(bbVal) {
+	var bb = data.ballotBoxes[bbVal]; 
+	if (bb.votes>0) {
+		return bb.votes;
+	} else {
+		var votes = 0;
+		for (var i=0;i<bb.options.length;i++) {
+			votes +=bb.options[i];
+		}
+		return votes;
+	}
 }
 
 function setOptionsVal(bbVal) {
@@ -138,11 +152,11 @@ function setOptionsVal(bbVal) {
 			var total=0;
 			for (var j=0;j<data.ballotBoxes.length;j++) {
 				val+=parseInt(data.ballotBoxes[j].options[i]);
-				total+=parseInt(data.ballotBoxes[j].votes);
+				total+=parseInt(getBBVotes(j));
 			}	
 		} else {
 			var val = data.ballotBoxes[bbVal].options[i];
-			var total = data.ballotBoxes[bbVal].votes;
+			var total = getBBVotes(bbVal);
 		}
 		var percentage = 100.0*val/total;
 		$("#"+prefix+i+"-value").text(val);
@@ -215,7 +229,7 @@ function generateChartData() {
 				bb.options[j]=0;
 		}
 		for (var i=0;i<data.ballotBoxes.length;i++) {
-			bb.votes+=data.ballotBoxes[i].votes;
+			bb.votes+=getBBVotes(i);
 			bb.quorum+=data.ballotBoxes[i].quorum;
 			
 			for (var j=0;j<data.options.length;j++) {
