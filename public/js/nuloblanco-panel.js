@@ -15,7 +15,7 @@ socket.on('data', function (newData) {
 // Socket receives "DataBit" on update.
 socket.on('dataBit', function (dataBit) {
 
-	// Initialize some variables.
+    // Initialize some variables.
 	var current = data;
 	var i;
 	var fields = dataBit.field;
@@ -121,9 +121,8 @@ function renderData() {
 		// Change the Selector index.
 		bbVal = bbData.length-1;
 		addedBB=false;
-		bbSelect.val(bbVal);
 	}
-
+    bbSelect.val(bbVal);
 	// Show actual ballot box data
 	setBallotBoxesVal(bbVal);
 

@@ -173,28 +173,20 @@ function genBBOption(name,color,votes,percentage,i) {
 					id:idPrefix
 				})					
 					.append($("<td>",{
-						type:"text",
-						class:"form-control input-sm",
 						id:idPrefix+"-name-value",
 						text:name
 					}))
 					.append($("<td>",{
-						type:"text",
-						class:"form-control input-sm",
 						id:idPrefix+"-name-value",
 						style:"background-color:"+color
 					}))
 
 					.append($("<td>",{
-						type:"text",
-						class:"form-control input-sm",
 						id:idPrefix+"-value",
 						text:votes
 					}))
 
 					.append($("<td>",{
-						type:"text",
-						class:"form-control input-sm",
 						id:idPrefix+"-percentage-value",
 						text:percentage
 					}))
